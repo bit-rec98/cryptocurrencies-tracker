@@ -1,0 +1,110 @@
+<div class="market-page">
+  <div class="market-header">
+    <div>
+      <h1 class="market-header__title">Cryptocurrency Market</h1>
+      <p class="market-header__subtitle">
+        Showing top {{ filteredCoins().length }} assets by market cap
+      </p>
+    </div>
+
+    <input
+      class="market-header__filter"
+      type="text"
+      placeholder="Filter by name or symbol..."
+      [value]="filterQuery()"
+      (input)="filterQuery.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (error()) {
+    <div class="error-state">
+      <p>⚠️ {{ error() }}</p>
+      <button class="btn btn--primary" (click)="ngOnInit()">Retry</button>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="crypto-table">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sort('market_cap_rank')">
+              # <span class="sort-icon">{{ sortIcon('market_cap_rank') }}</span>
+            </th>
+            <th>Name</th>
+            <th class="num sortable" (click)="sort('current_price')">
+              Price <span class="sort-icon">{{ sortIcon('current_price') }}</span>
+            </th>
+            <th class="num sortable" (click)="sort('price_change_percentage_24h')">
+              24h % <span class="sort-icon">{{ sortIcon('price_change_percentage_24h') }}</span>
+            </th>
+            <th class="num sortable hide-sm" (click)="sort('market_cap')">
+              Market Cap <span class="sort-icon">{{ sortIcon('market_cap') }}</span>
+            </th>
+            <th class="num sortable hide-md" (click)="sort('total_volume')">
+              Volume (24h) <span class="sort-icon">{{ sortIcon('total_volume') }}</span>
+            </th>
+            <th class="num hide-lg">Circulating</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (coin of filteredCoins(); track coin.id) {
+            <tr class="crypto-row" [routerLink]="['/coin', coin.id]">
+              <td class="rank">{{ coin.market_cap_rank }}</td>
+              <td>
+                <div class="coin-id">
+                  <img [src]="coin.image" [alt]="coin.name" width="28" height="28" />
+                  <div class="coin-id__text">
+                    <span class="coin-id__name">{{ coin.name }}</span>
+                    <span class="coin-id__symbol">{{ coin.symbol | uppercase }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="num price">
+                {{ coin.current_price | cryptoPrice: currency() }}
+              </td>
+              <td class="num">
+                <app-price-badge [value]="coin.price_change_percentage_24h" />
+              </td>
+              <td class="num hide-sm text-muted">
+                ${{ coin.market_cap | largeNumber }}
+              </td>
+              <td class="num hide-md text-muted">
+                ${{ coin.total_volume | largeNumber }}
+              </td>
+              <td class="num hide-lg text-muted">
+                {{ coin.circulating_supply | largeNumber: 0 }}
+                {{ coin.symbol | uppercase }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button
+          class="btn btn--ghost"
+          [disabled]="pagination().page === 1"
+          (click)="goToPage(pagination().page - 1)"
+        >
+          ← Prev
+        </button>
+
+        <span class="pagination__info">
+          Page {{ pagination().page }} of {{ totalPages }}
+        </span>
+
+        <button
+          class="btn btn--ghost"
+          [disabled]="pagination().page >= totalPages"
+          (click)="goToPage(pagination().page + 1)"
+        >
+          Next →
+        </button>
+      </div>
+    }
+  }
+</div>

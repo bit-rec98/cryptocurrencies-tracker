@@ -1,0 +1,48 @@
+# ─── Dependencies ────────────────────────────────────────────────
+node_modules/
+
+# ─── Build outputs ───────────────────────────────────────────────
+dist/
+build/
+out-tsc/
+bazel-out/
+*.tsbuildinfo
+
+# ─── Environment variables ───────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+!.env.example
+
+# ─── Angular cache ───────────────────────────────────────────────
+.angular/cache/
+
+# ─── IDE & editor files ──────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+.history/
+
+# ─── Logs ────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Testing & coverage ──────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── OS files ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/

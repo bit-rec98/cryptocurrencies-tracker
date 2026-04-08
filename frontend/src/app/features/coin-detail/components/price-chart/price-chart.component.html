@@ -1,0 +1,11 @@
+<div class="chart-container">
+  @if (loading) {
+    <div class="chart-loading">
+      <div class="spinner"></div>
+    </div>
+  } @else if (!priceHistory) {
+    <div class="chart-empty">No chart data available</div>
+  } @else {
+    <canvas #chartCanvas></canvas>
+  }
+</div>

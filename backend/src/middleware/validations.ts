@@ -42,7 +42,6 @@ export const cryptocurrencySchemas = {
   }),
 
   getCryptocurrencyChart: Joi.object({
-    id: Joi.string().required().min(1),
     days: Joi.number().valid(1, 7, 14, 30, 90, 180, 365).default(7),
     currency: Joi.string().valid('usd', 'eur', 'btc', 'eth', 'gbp', 'jpy', 'cad', 'aud').default('usd')
   }),

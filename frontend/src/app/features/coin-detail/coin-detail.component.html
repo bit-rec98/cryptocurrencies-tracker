@@ -1,0 +1,227 @@
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (error()) {
+  <div class="error-state">
+    <p>⚠️ {{ error() }}</p>
+    <a routerLink="/market" class="btn btn--ghost">← Back to Market</a>
+  </div>
+} @else if (coin()) {
+  <div class="detail-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/">Home</a>
+      <span>/</span>
+      <a routerLink="/market">Market</a>
+      <span>/</span>
+      <span>{{ coin()!.name }}</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="coin-header">
+      <div class="coin-header__left">
+        <img
+          class="coin-header__img"
+          [src]="coin()!.image"
+          [alt]="coin()!.name"
+          width="56"
+          height="56"
+        />
+        <div>
+          <div class="coin-header__name-row">
+            <h1 class="coin-header__name">{{ coin()!.name }}</h1>
+            <span class="coin-header__symbol">{{ coin()!.symbol | uppercase }}</span>
+            <span class="coin-header__rank">#{{ coin()!.market_cap_rank }}</span>
+          </div>
+          <div class="coin-header__price-row">
+            <span class="coin-header__price">
+              {{ coin()!.current_price | cryptoPrice: currency() }}
+            </span>
+            <app-price-badge [value]="coin()!.price_change_percentage_24h" />
+          </div>
+        </div>
+      </div>
+
+      <div class="coin-header__stats">
+        <div class="header-stat">
+          <span class="header-stat__label">24h High</span>
+          <span class="header-stat__value positive">
+            {{ coin()!.high_24h | cryptoPrice: currency() }}
+          </span>
+        </div>
+        <div class="header-stat">
+          <span class="header-stat__label">24h Low</span>
+          <span class="header-stat__value negative">
+            {{ coin()!.low_24h | cryptoPrice: currency() }}
+          </span>
+        </div>
+        <div class="header-stat">
+          <span class="header-stat__label">ATH</span>
+          <span class="header-stat__value">{{ coin()!.ath | cryptoPrice: currency() }}</span>
+        </div>
+        <div class="header-stat">
+          <span class="header-stat__label">ATL</span>
+          <span class="header-stat__value">{{ coin()!.atl | cryptoPrice: currency() }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Chart section -->
+    <section class="card chart-card">
+      <div class="chart-card__header">
+        <h2 class="card-title">Price Chart</h2>
+        <div class="range-tabs">
+          @for (days of chartDays; track days) {
+            <button
+              class="range-tab"
+              [class.active]="selectedDays() === days"
+              (click)="changeChartRange(days)"
+            >
+              {{ days === 1 ? '1D' : days === 7 ? '1W' : days === 14 ? '2W' : days === 30 ? '1M' : days === 90 ? '3M' : days === 180 ? '6M' : '1Y' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <app-price-chart
+        [priceHistory]="priceHistory()"
+        [selectedDays]="selectedDays()"
+        [currency]="currency()"
+        [loading]="chartLoading()"
+      />
+    </section>
+
+    <!-- Stats grid -->
+    <section class="stats-grid">
+      <div class="card stats-card">
+        <h3 class="card-title">Market Data</h3>
+        <dl class="stats-list">
+          <div class="stats-row">
+            <dt>Market Cap</dt>
+            <dd>${{ coin()!.market_cap | largeNumber }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>Fully Diluted Val.</dt>
+            <dd>{{ coin()!.fully_diluted_valuation ? ('$' + (coin()!.fully_diluted_valuation | largeNumber)) : '—' }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>24h Volume</dt>
+            <dd>${{ coin()!.total_volume | largeNumber }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>Vol / Market Cap</dt>
+            <dd>{{ (coin()!.total_volume / coin()!.market_cap | number: '1.4-4') }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>Market Cap Change 24h</dt>
+            <dd>
+              <app-price-badge [value]="coin()!.market_cap_change_percentage_24h" />
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="card stats-card">
+        <h3 class="card-title">Supply</h3>
+        <dl class="stats-list">
+          <div class="stats-row">
+            <dt>Circulating Supply</dt>
+            <dd>{{ coin()!.circulating_supply | largeNumber: 0 }} {{ coin()!.symbol | uppercase }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>Total Supply</dt>
+            <dd>{{ coin()!.total_supply ? ((coin()!.total_supply | largeNumber: 0) + ' ' + (coin()!.symbol | uppercase)) : '∞' }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>Max Supply</dt>
+            <dd>{{ coin()!.max_supply ? ((coin()!.max_supply | largeNumber: 0) + ' ' + (coin()!.symbol | uppercase)) : '∞' }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>ATH Date</dt>
+            <dd>{{ coin()!.ath_date | date: 'mediumDate' }}</dd>
+          </div>
+          <div class="stats-row">
+            <dt>ATH Change</dt>
+            <dd><app-price-badge [value]="coin()!.ath_change_percentage" /></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- Description -->
+    @if (descriptionText) {
+      <section class="card description-card">
+        <h3 class="card-title">About {{ coin()!.name }}</h3>
+        <p class="description-text">{{ truncatedDescription }}</p>
+        @if (descriptionText.length > 300) {
+          <button class="btn-link" (click)="descriptionExpanded = !descriptionExpanded">
+            {{ descriptionExpanded ? 'Show less' : 'Show more' }}
+          </button>
+        }
+      </section>
+    }
+
+    <!-- Links -->
+    @if (coin()!.links) {
+      <section class="card links-card">
+        <h3 class="card-title">Links</h3>
+        <div class="links-grid">
+          @if (filterLinks(coin()!.links!.homepage).length) {
+            <div class="link-group">
+              <span class="link-group__label">Website</span>
+              <div class="link-group__links">
+                @for (url of filterLinks(coin()!.links!.homepage).slice(0, 2); track url) {
+                  <a [href]="url" target="_blank" rel="noopener noreferrer" class="link-pill">
+                    🌐 {{ url | slice: 8 : 40 }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
+          @if (coin()!.links!.twitter_screen_name) {
+            <div class="link-group">
+              <span class="link-group__label">Twitter / X</span>
+              <a
+                [href]="'https://twitter.com/' + coin()!.links!.twitter_screen_name"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link-pill"
+              >
+                🐦 &#64;{{ coin()!.links!.twitter_screen_name }}
+              </a>
+            </div>
+          }
+          @if (coin()!.links!.subreddit_url) {
+            <div class="link-group">
+              <span class="link-group__label">Reddit</span>
+              <a
+                [href]="coin()!.links!.subreddit_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link-pill"
+              >
+                Reddit Community
+              </a>
+            </div>
+          }
+          @if (coin()!.links!.repos_url && filterLinks(coin()!.links!.repos_url.github).length) {
+            <div class="link-group">
+              <span class="link-group__label">GitHub</span>
+              <div class="link-group__links">
+                @for (url of filterLinks(coin()!.links!.repos_url.github).slice(0, 2); track url) {
+                  <a [href]="url" target="_blank" rel="noopener noreferrer" class="link-pill">
+                    ⌥ {{ url | slice: 19 : 50 }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="last-updated">
+      Last updated: {{ coin()!.last_updated | date: 'medium' }}
+    </div>
+  </div>
+}

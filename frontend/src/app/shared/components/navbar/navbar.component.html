@@ -1,0 +1,73 @@
+<nav class="navbar">
+  <div class="navbar__inner">
+    <!-- Logo -->
+    <a class="navbar__brand" routerLink="/">
+      <span class="navbar__logo-icon">₿</span>
+      <span class="navbar__logo-text">CryptoTracker</span>
+    </a>
+
+    <!-- Desktop nav links -->
+    <ul class="navbar__links">
+      <li>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      </li>
+      <li>
+        <a routerLink="/market" routerLinkActive="active">Market</a>
+      </li>
+    </ul>
+
+    <!-- Search -->
+    <div class="navbar__search">
+      <input
+        type="text"
+        placeholder="Search coins..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch($event)"
+        (focus)="showDropdown.set(searchQuery.length >= 2)"
+        autocomplete="off"
+      />
+      <span class="navbar__search-icon">⌕</span>
+
+      @if (showDropdown()) {
+        <div class="navbar__search-dropdown">
+          @if (searchLoading()) {
+            <div class="dropdown-item dropdown-item--loading">Searching...</div>
+          } @else if (searchResults().length === 0) {
+            <div class="dropdown-item dropdown-item--empty">No results found</div>
+          } @else {
+            @for (coin of searchResults(); track coin.id) {
+              <button class="dropdown-item" (click)="selectCoin(coin)">
+                <img [src]="coin.thumb" [alt]="coin.name" width="20" height="20" />
+                <span class="coin-name">{{ coin.name }}</span>
+                <span class="coin-symbol">{{ coin.symbol | uppercase }}</span>
+                @if (coin.market_cap_rank) {
+                  <span class="coin-rank">#{{ coin.market_cap_rank }}</span>
+                }
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Currency selector -->
+    <select class="navbar__currency" [value]="currency()" (change)="changeCurrency($any($event.target).value)">
+      @for (c of currencies; track c) {
+        <option [value]="c">{{ c | uppercase }}</option>
+      }
+    </select>
+
+    <!-- Mobile hamburger -->
+    <button class="navbar__hamburger" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  @if (mobileMenuOpen()) {
+    <div class="navbar__mobile-menu">
+      <a routerLink="/" (click)="toggleMobileMenu()">Home</a>
+      <a routerLink="/market" (click)="toggleMobileMenu()">Market</a>
+    </div>
+  }
+</nav>

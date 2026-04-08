@@ -1,0 +1,187 @@
+.market-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.market-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 0.2rem;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__filter {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    min-width: 240px;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+
+    &:focus {
+      border-color: var(--accent);
+    }
+  }
+}
+
+.table-wrapper {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.crypto-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead tr {
+    background: var(--bg-secondary);
+
+    th {
+      padding: 0.8rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      user-select: none;
+
+      &.num {
+        text-align: right;
+      }
+
+      &.sortable {
+        cursor: pointer;
+
+        &:hover {
+          color: var(--text-primary);
+        }
+      }
+    }
+  }
+
+  tbody tr {
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+
+    &:hover {
+      background: var(--bg-card);
+    }
+
+    td {
+      padding: 0.8rem 1rem;
+    }
+  }
+}
+
+.sort-icon {
+  opacity: 0.6;
+  font-size: 0.7rem;
+  margin-left: 3px;
+}
+
+.rank {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.coin-id {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  img {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  &__symbol {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+
+  &__info {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+}
+
+.error-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: var(--text-secondary);
+
+  p { margin-bottom: 1.5rem; }
+}
+
+@media (max-width: 1100px) {
+  .hide-lg { display: none; }
+}
+@media (max-width: 768px) {
+  .hide-md { display: none; }
+}
+@media (max-width: 520px) {
+  .hide-sm { display: none; }
+}

@@ -1,0 +1,23 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+
+  &.positive {
+    color: var(--positive);
+    background: rgba(16, 185, 129, 0.12);
+  }
+
+  &.negative {
+    color: var(--negative);
+    background: rgba(239, 68, 68, 0.12);
+  }
+
+  .arrow {
+    font-size: 0.65rem;
+  }
+}

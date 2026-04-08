@@ -1,0 +1,119 @@
+<section class="hero">
+  <div class="hero__content">
+    <h1 class="hero__title">
+      Track the <span class="hero__accent">Crypto Market</span>
+    </h1>
+    <p class="hero__subtitle">
+      Real-time prices, charts, and insights for thousands of cryptocurrencies.
+    </p>
+    <a routerLink="/market" class="btn btn--primary btn--lg">
+      View Full Market →
+    </a>
+  </div>
+
+  <div class="hero__stats">
+    <div class="stat-card">
+      <span class="stat-card__label">Tracked Assets</span>
+      <span class="stat-card__value">10,000+</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__label">Data Updates</span>
+      <span class="stat-card__value">Real-time</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__label">Currencies</span>
+      <span class="stat-card__value">8 Supported</span>
+    </div>
+  </div>
+</section>
+
+<!-- Trending Section -->
+<section class="section">
+  <div class="section__header">
+    <h2 class="section__title">🔥 Trending Now</h2>
+    <span class="section__subtitle">Most searched in the last 24 hours</span>
+  </div>
+
+  @if (trendingLoading()) {
+    <app-loading-spinner />
+  } @else {
+    <div class="trending-grid">
+      @for (item of trending().slice(0, 7); track item.item.id) {
+        <a [routerLink]="['/coin', item.item.id]" class="trending-card">
+          <div class="trending-card__rank">#{{ item.item.score + 1 }}</div>
+          <img
+            class="trending-card__img"
+            [src]="item.item.large"
+            [alt]="item.item.name"
+            width="40"
+            height="40"
+          />
+          <div class="trending-card__info">
+            <span class="trending-card__name">{{ item.item.name }}</span>
+            <span class="trending-card__symbol">{{ item.item.symbol | uppercase }}</span>
+          </div>
+          @if (item.item.data?.price_change_percentage_24h?.['usd'] != null) {
+            <app-price-badge
+              [value]="item.item.data!.price_change_percentage_24h!['usd']"
+            />
+          }
+        </a>
+      }
+    </div>
+  }
+</section>
+
+<!-- Top Coins Table -->
+<section class="section">
+  <div class="section__header">
+    <h2 class="section__title">Top Cryptocurrencies</h2>
+    <a routerLink="/market" class="section__link">See all →</a>
+  </div>
+
+  @if (marketLoading()) {
+    <app-loading-spinner />
+  } @else {
+    <div class="table-wrapper">
+      <table class="crypto-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th class="num">Price</th>
+            <th class="num">24h %</th>
+            <th class="num hide-sm">Market Cap</th>
+            <th class="num hide-md">Volume (24h)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (coin of topCoins(); track coin.id) {
+            <tr class="crypto-row" [routerLink]="['/coin', coin.id]">
+              <td class="rank">{{ coin.market_cap_rank }}</td>
+              <td>
+                <div class="coin-id">
+                  <img [src]="coin.image" [alt]="coin.name" width="28" height="28" />
+                  <div class="coin-id__text">
+                    <span class="coin-id__name">{{ coin.name }}</span>
+                    <span class="coin-id__symbol">{{ coin.symbol | uppercase }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="num price">
+                {{ coin.current_price | cryptoPrice: currency() }}
+              </td>
+              <td class="num">
+                <app-price-badge [value]="coin.price_change_percentage_24h" />
+              </td>
+              <td class="num hide-sm">
+                ${{ coin.market_cap | largeNumber }}
+              </td>
+              <td class="num hide-md">
+                ${{ coin.total_volume | largeNumber }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -23,7 +23,41 @@ export class CryptocurrencyRepository implements ICryptocurrencyRepository {
     currency: string = "usd"
   ): Promise<CryptocurrencyDetails> {
     const url = `/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`;
-    return await this.httpClient.get<CryptocurrencyDetails>(url);
+    const raw = await this.httpClient.get<any>(url);
+    const md = raw.market_data ?? {};
+    const cur = currency.toLowerCase();
+
+    return {
+      id: raw.id,
+      symbol: raw.symbol,
+      name: raw.name,
+      image: raw.image?.large ?? raw.image?.small ?? raw.image?.thumb ?? "",
+      market_cap_rank: raw.market_cap_rank,
+      last_updated: raw.last_updated,
+      description: raw.description,
+      links: raw.links,
+      // Flatten market_data fields from currency-keyed objects
+      current_price: md.current_price?.[cur] ?? 0,
+      market_cap: md.market_cap?.[cur] ?? 0,
+      fully_diluted_valuation: md.fully_diluted_valuation?.[cur] ?? null,
+      total_volume: md.total_volume?.[cur] ?? 0,
+      high_24h: md.high_24h?.[cur] ?? 0,
+      low_24h: md.low_24h?.[cur] ?? 0,
+      ath: md.ath?.[cur] ?? 0,
+      ath_change_percentage: md.ath_change_percentage?.[cur] ?? 0,
+      ath_date: md.ath_date?.[cur] ?? "",
+      atl: md.atl?.[cur] ?? 0,
+      atl_change_percentage: md.atl_change_percentage?.[cur] ?? 0,
+      atl_date: md.atl_date?.[cur] ?? "",
+      // These come as plain numbers (not currency-keyed)
+      price_change_24h: md.price_change_24h ?? 0,
+      price_change_percentage_24h: md.price_change_percentage_24h ?? 0,
+      market_cap_change_24h: md.market_cap_change_24h ?? 0,
+      market_cap_change_percentage_24h: md.market_cap_change_percentage_24h ?? 0,
+      circulating_supply: md.circulating_supply ?? 0,
+      total_supply: md.total_supply ?? null,
+      max_supply: md.max_supply ?? null,
+    };
   }
 
   async getCryptocurrencyPriceHistory(
