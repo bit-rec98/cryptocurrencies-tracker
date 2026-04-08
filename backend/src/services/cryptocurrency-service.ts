@@ -5,6 +5,7 @@ import {
   CryptocurrencyDetails,
   PriceHistory,
 } from "@/models/cryptocurrency";
+import { logger } from "@/utils/logger";
 
 export class CryptocurrencyService implements ICryptocurrencyService {
   constructor(private cryptocurrencyRepository: ICryptocurrencyRepository) {}
@@ -14,27 +15,26 @@ export class CryptocurrencyService implements ICryptocurrencyService {
     limit: number = 50,
     currency: string = "usd"
   ): Promise<Cryptocurrency[]> {
+    logger.debug("getTopCryptocurrencies", { page, limit, currency });
     this.validatePagination(page, limit);
     this.validateCurrency(currency);
 
-    return await this.cryptocurrencyRepository.getAllCryptocurrencies(
-      page,
-      limit,
-      currency
-    );
+    const result = await this.cryptocurrencyRepository.getAllCryptocurrencies(page, limit, currency);
+    logger.info(`Fetched ${result.length} cryptocurrencies`, { page, limit, currency });
+    return result;
   }
 
   async getCryptocurrencyDetails(
     id: string,
     currency: string = "usd"
   ): Promise<CryptocurrencyDetails> {
+    logger.debug("getCryptocurrencyDetails", { id, currency });
     this.validateId(id);
     this.validateCurrency(currency);
 
-    return await this.cryptocurrencyRepository.getCryptocurrencyById(
-      id,
-      currency
-    );
+    const result = await this.cryptocurrencyRepository.getCryptocurrencyById(id, currency);
+    logger.info(`Fetched details for cryptocurrency`, { id, currency });
+    return result;
   }
 
   async getCryptocurrencyChart(
@@ -42,25 +42,30 @@ export class CryptocurrencyService implements ICryptocurrencyService {
     days: number = 7,
     currency: string = "usd"
   ): Promise<PriceHistory> {
+    logger.debug("getCryptocurrencyChart", { id, days, currency });
     this.validateId(id);
     this.validateDays(days);
     this.validateCurrency(currency);
 
-    return await this.cryptocurrencyRepository.getCryptocurrencyPriceHistory(
-      id,
-      days,
-      currency
-    );
+    const result = await this.cryptocurrencyRepository.getCryptocurrencyPriceHistory(id, days, currency);
+    logger.info(`Fetched price history`, { id, days, currency });
+    return result;
   }
 
   async searchCryptocurrencies(query: string): Promise<any[]> {
+    logger.debug("searchCryptocurrencies", { query });
     this.validateSearchQuery(query);
 
-    return await this.cryptocurrencyRepository.searchCryptocurrencies(query);
+    const result = await this.cryptocurrencyRepository.searchCryptocurrencies(query);
+    logger.info(`Search returned ${result.length} results`, { query });
+    return result;
   }
 
   async getTrendingCryptocurrencies(): Promise<any> {
-    return await this.cryptocurrencyRepository.getTrendingCryptocurrencies();
+    logger.debug("getTrendingCryptocurrencies");
+    const result = await this.cryptocurrencyRepository.getTrendingCryptocurrencies();
+    logger.info("Fetched trending cryptocurrencies");
+    return result;
   }
 
   private validatePagination(page: number, limit: number): void {

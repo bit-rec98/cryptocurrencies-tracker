@@ -1,3 +1,4 @@
+import NodeCache from "node-cache";
 import { ICryptocurrencyRepository } from "@/interfaces/icryptocurrency-repository";
 import { IHttpClient } from "@/interfaces/ihttpclient";
 import {
@@ -5,6 +6,17 @@ import {
   CryptocurrencyDetails,
   PriceHistory,
 } from "@/models/cryptocurrency";
+import { logger } from "@/utils/logger";
+
+const cache = new NodeCache({ useClones: false });
+
+const TTL = {
+  trending: 60,
+  list: 60,
+  details: 30,
+  chart: 300,
+  search: 30,
+};
 
 export class CryptocurrencyRepository implements ICryptocurrencyRepository {
   constructor(private httpClient: IHttpClient) {}
@@ -14,20 +26,36 @@ export class CryptocurrencyRepository implements ICryptocurrencyRepository {
     limit: number = 50,
     currency: string = "usd"
   ): Promise<Cryptocurrency[]> {
+    const key = `list:${currency}:${page}:${limit}`;
+    const cached = cache.get<Cryptocurrency[]>(key);
+    if (cached) {
+      logger.debug("Cache hit", { key });
+      return cached;
+    }
+    logger.debug("Cache miss — fetching from API", { key });
     const url = `/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=false&price_change_percentage=24h`;
-    return await this.httpClient.get<Cryptocurrency[]>(url);
+    const result = await this.httpClient.get<Cryptocurrency[]>(url);
+    cache.set(key, result, TTL.list);
+    return result;
   }
 
   async getCryptocurrencyById(
     id: string,
     currency: string = "usd"
   ): Promise<CryptocurrencyDetails> {
+    const key = `details:${id}:${currency}`;
+    const cached = cache.get<CryptocurrencyDetails>(key);
+    if (cached) {
+      logger.debug("Cache hit", { key });
+      return cached;
+    }
+    logger.debug("Cache miss — fetching from API", { key });
     const url = `/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`;
     const raw = await this.httpClient.get<any>(url);
     const md = raw.market_data ?? {};
     const cur = currency.toLowerCase();
 
-    return {
+    const result: CryptocurrencyDetails = {
       id: raw.id,
       symbol: raw.symbol,
       name: raw.name,
@@ -58,6 +86,8 @@ export class CryptocurrencyRepository implements ICryptocurrencyRepository {
       total_supply: md.total_supply ?? null,
       max_supply: md.max_supply ?? null,
     };
+    cache.set(key, result, TTL.details);
+    return result;
   }
 
   async getCryptocurrencyPriceHistory(
@@ -65,20 +95,44 @@ export class CryptocurrencyRepository implements ICryptocurrencyRepository {
     days: number = 7,
     currency: string = "usd"
   ): Promise<PriceHistory> {
-    const url = `/coins/${id}/market_chart?vs_currency=${currency}&days=${days}&interval=${
-      days <= 1 ? "hourly" : "daily"
-    }`;
-    return await this.httpClient.get<PriceHistory>(url);
+    const key = `chart:${id}:${currency}:${days}`;
+    const cached = cache.get<PriceHistory>(key);
+    if (cached) {
+      logger.debug("Cache hit", { key });
+      return cached;
+    }
+    logger.debug("Cache miss — fetching from API", { key });
+    const url = `/coins/${id}/market_chart?vs_currency=${currency}&days=${days}`;
+    const result = await this.httpClient.get<PriceHistory>(url);
+    cache.set(key, result, TTL.chart);
+    return result;
   }
 
   async searchCryptocurrencies(query: string): Promise<any[]> {
+    const key = `search:${query.toLowerCase()}`;
+    const cached = cache.get<any[]>(key);
+    if (cached) {
+      logger.debug("Cache hit", { key });
+      return cached;
+    }
+    logger.debug("Cache miss — fetching from API", { key });
     const url = `/search?query=${encodeURIComponent(query)}`;
     const response = await this.httpClient.get<{ coins: any[] }>(url);
+    cache.set(key, response.coins, TTL.search);
     return response.coins;
   }
 
   async getTrendingCryptocurrencies(): Promise<any> {
+    const key = "trending";
+    const cached = cache.get(key);
+    if (cached) {
+      logger.debug("Cache hit", { key });
+      return cached;
+    }
+    logger.debug("Cache miss — fetching from API", { key });
     const url = "/search/trending";
-    return await this.httpClient.get(url);
+    const result = await this.httpClient.get(url);
+    cache.set(key, result, TTL.trending);
+    return result;
   }
 }

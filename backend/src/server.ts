@@ -6,6 +6,7 @@ import { envConfig } from './config/config';
 import { setupRoutes } from './routes/main-routes';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { apiLimiter } from './middleware/rate-limiter';
+import { logger, morganStream } from './utils/logger';
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 app.use(helmet());
-app.use(morgan(envConfig.nodeEnv === "development" ? "dev" : "combined"));
+app.use(morgan(envConfig.nodeEnv === 'production' ? 'combined' : 'dev', { stream: morganStream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,7 +41,7 @@ app.use(errorHandler);
 // Start server
 const PORT = envConfig.port;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${envConfig.nodeEnv} mode`);
+  logger.info(`Server running on port ${PORT} in ${envConfig.nodeEnv} mode`);
 });
 
 export default app;

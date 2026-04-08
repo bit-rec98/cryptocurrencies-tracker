@@ -1,0 +1,72 @@
+<div class="crypto-list-container">
+  <div class="controls-section">
+    <div class="search-section">
+      <input
+        type="text"
+        [formControl]="searchControl"
+        placeholder="Search cryptocurrencies..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="currency-selector">
+      <label for="currency">Currency:</label>
+      <select
+        id="currency"
+        [value]="selectedCurrency"
+        (change)="onCurrencyChange($event.target.value)"
+        class="currency-select"
+      >
+        <option *ngFor="let currency of supportedCurrencies" [value]="currency">
+          {{ currency.toUpperCase() }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div *ngIf="loading" class="loading-state">
+      <app-loading-spinner></app-loading-spinner>
+      <p>Loading cryptocurrencies...</p>
+    </div>
+
+    <div *ngIf="error" class="error-state">
+      <p class="error-message">{{ error }}</p>
+      <button (click)="loadCryptocurrencies()" class="retry-button">
+        Retry
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && cryptocurrencies.length > 0" class="crypto-grid">
+      <app-crypto-card
+        *ngFor="let crypto of cryptocurrencies; trackBy: trackByCryptoId"
+        [cryptocurrency]="crypto"
+        [currency]="selectedCurrency"
+        class="crypto-card-item"
+      ></app-crypto-card>
+    </div>
+
+    <div *ngIf="!loading && !error && cryptocurrencies.length === 0" class="empty-state">
+      <p>No cryptocurrencies found.</p>
+    </div>
+  </div>
+
+  <div class="pagination-section" *ngIf="!loading && !error && cryptocurrencies.length > 0">
+    <button
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      class="pagination-button"
+    >
+      Previous
+    </button>
+
+    <span class="page-info">Page {{ currentPage }}</span>
+
+    <button
+      (click)="onPageChange(currentPage + 1)"
+      class="pagination-button"
+    >
+      Next
+    </button>
+  </div>
+</div>
